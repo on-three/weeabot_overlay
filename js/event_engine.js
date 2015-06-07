@@ -26,8 +26,8 @@ var event_engine = {
 
   niconicoDisplay : function(stage) {
     this.lanes = [];
-    for (var i = 1; i <= 10; i++) {
-      this.lanes.push(new event_engine.lane(stage, i*34+20));
+    for (var i = 0; i < 10; i++) {
+      this.lanes.push(new event_engine.lane(stage, i*34+10));
     };
 
     this.Add = function (msg) {
@@ -47,6 +47,9 @@ var event_engine = {
     var that = this;
     this.queue = [];
     this.currentText = undefined;
+    this.Clear = function() {
+      this.queue = [];
+    };
     this.Add = function (msg) {
       if(this.currentText!=undefined) {
         this.queue.push(msg)
@@ -62,19 +65,21 @@ var event_engine = {
       outline.lineWidth = max_text_width;
       var fill = new createjs.Text(msg, "36px Arial", "#ffff00");
       fill.lineWidth = max_text_width;
-      this.currentText.addChild(outline);
+      //this.currentText.addChild(outline);
       this.currentText.addChild(fill);
-//       //text.shadow = new createjs.Shadow("#000000", 4, 4, 4);
+      this.currentText.shadow = new createjs.Shadow("#000000", 2, 2, 5);
       var text_width = fill.getBounds().width;
       var text_height = fill.getBounds().height;
+      this.currentText.alpha = 0;
       this.currentText.y = h;
       //center
       this.currentText.x = w/2 - text_width/2;
-//       //text.x = 100;
+
       stage.addChild(this.currentText);
       createjs.Tween.get(this.currentText,{loop: false})
-        .to({y:600}, 1500)
+        .to({alpha:1,y:600}, 1500, createjs.Ease.backIn)
         .wait(5000)
+        .to({alpha:0,y:480}, 1500, createjs.Ease.backOut)
         .call(function(){
           stage.removeChild(that.currentText);
           that.currentText = undefined;
@@ -116,11 +121,31 @@ var event_engine = {
     // Create a server object with options 
     this.serv =  new rpc.Server(options);
 
-    this.serv.addMethod('scrollingText', function (para, callback){
+    this.serv.addMethod('StaticMessage', function (para, callback){
+      var msg = para.msg;
+      subtitle.Add(msg);
+      var error, result;
+      result = 'OK';
+      callback(error, result);
+    });
+
+    this.serv.addMethod('ClearAll', function (para, callback){
+      subtitle.Clear();
+      var error, result;
+      result = 'OK';
+      callback(error, result);
+    });
+
+    this.serv.addMethod('ScrollingMessage', function (para, callback){
+      //subtitle.Clear();
+      var error, result;
+      result = 'OK';
+      callback(error, result);
+    });
+
+    this.serv.addMethod('AddNicoNicoMsg', function (para, callback){
 
       var msg = para.msg;
-
-      subtitle.Add(msg);
 
       var error, result;
       //add text to stage
@@ -128,9 +153,9 @@ var event_engine = {
       var outline = new createjs.Text(msg, "36px Arial", "#000000");
       outline.outline = 3;
       var fill = new createjs.Text(msg, "36px Arial", "#ffff00");
-      c.addChild(outline);
+      //c.addChild(outline);
       c.addChild(fill);
-      //text.shadow = new createjs.Shadow("#000000", 4, 4, 4);
+      fill.shadow = new createjs.Shadow("#000000", 2, 2, 4);
       var w = stage.canvas.width;
       var text_width = fill.getBounds().width;
       c.x = w;

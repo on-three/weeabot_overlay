@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: set ts=2 expandtab:
 '''
-Module: textmsg.py
+Module: staticmsg.py
 Desc: drive overlay with a demo json rpc call
 Author: on-three
 Email: oneil.john@gmail.com
@@ -33,7 +33,7 @@ def send_text(msg):
     #username = 'Username',
     #password = 'Password',
   )
-  response = http_client.AddNicoNicoMsg(msg=msg)
+  response = http_client.StaticMessage(msg=msg)
   print 'response: ' + response
 
 def main():
