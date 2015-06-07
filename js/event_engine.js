@@ -3,8 +3,49 @@
 
 var event_engine = {
 
+  lane : function(stage, ypos) {
+    this.y = ypos;
+    this.t_complete = 0;
+    this.AddText = function() {
+      //keep track of the time from now in seconds this lane will be clear
+      this.t_complete = performance.now() + 6000;
+    };
+    this.CanAdd = function(stage, text) {
+      //can we add the given text to this lane?
+      var t_remaining = this.t_complete - performance.now();
+      if(t_remaining <= 0) {
+        return true;
+      }
+      var stage_width = stage.canvas.width;
+      var text_width = text.getBounds().width;
+      var speed = (stage_width + text_width)/6000;
+      var t_screen = stage_width/speed;//milliseconds for front of blurb to cross the screen
+      return (t_screen > t_remaining);
+    }
+  },
+
+  niconicoDisplay : function(stage) {
+    this.lanes = [];
+    for (var i = 1; i <= 10; i++) {
+      this.lanes.push(new event_engine.lane(stage, i*34+20));
+    };
+
+    this.Add = function (msg) {
+        for(l in this.lanes) {
+          ln = this.lanes[l];
+          if(ln.CanAdd(stage, msg)) {
+            ln.AddText();
+            return ln.y;
+            break;
+          }
+        }
+        return 0;
+      };
+    },
+
   init: function(stage) {
     var rpc = require('node-json-rpc');
+    niconico = new event_engine.niconicoDisplay(stage);
 
     var options = {
       // int port of rpc server, default 5080 for http or 5433 for https 
@@ -34,6 +75,7 @@ var event_engine = {
       var w = stage.canvas.width;
       var text_width = fill.getBounds().width;
       c.x = w;
+      c.y = niconico.Add(fill);
       //text.x = 100;
       stage.addChild(c);
 
