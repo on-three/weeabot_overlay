@@ -3,6 +3,7 @@ SOURCES:=index.html package.json
 SOURCES+=$(wildcard media/*)
 SOURCES+=$(wildcard js/*)
 SOURCES+=$(wildcard css/*)
+SOURCES+=$(shell find node_modules/)
 
 $(TARGET): $(SOURCES)
 	zip $(TARGET) $(SOURCES)
