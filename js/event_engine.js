@@ -27,11 +27,14 @@ var event_engine = {
       console.log("GOT TEST MESSAGE");
       //add text to stage
       var text = new createjs.Text(text, "20px Arial", "#ff7700");
-      var bounds = stage.getBounds();
-      //text.x = bounds.width;
-      text.x = 100;
+      var w = stage.canvas.width;
+      text.x = w;
+      //text.x = 100;
       stage.addChild(text);
 
+      createjs.Tween.get(text,{loop: false})
+        .to({x:0}, 4000)
+        .call(function(){stage.removeChild(text);});
         //   var circle = new createjs.Shape();
         // circle.graphics.beginFill("Yellow").drawCircle(0, 0, 75);
         // circle.x = 100;
