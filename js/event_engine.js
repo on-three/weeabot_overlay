@@ -43,9 +43,64 @@ var event_engine = {
       };
     },
 
+  subtitleDisplay : function(stage) {
+    var that = this;
+    this.queue = [];
+    this.currentText = undefined;
+    this.Add = function (msg) {
+      if(this.currentText!=undefined) {
+        this.queue.push(msg)
+        return;
+      }
+      var w = stage.canvas.width;
+      var h = stage.canvas.height;
+      //limit text width to 3/4 canvas width
+      var max_text_width = 3*w/4;
+      this.currentText = new createjs.Container()
+      var outline = new createjs.Text(msg, "36px Arial", "#000000");
+      outline.outline = 3;
+      outline.lineWidth = max_text_width;
+      var fill = new createjs.Text(msg, "36px Arial", "#ffff00");
+      fill.lineWidth = max_text_width;
+      this.currentText.addChild(outline);
+      this.currentText.addChild(fill);
+//       //text.shadow = new createjs.Shadow("#000000", 4, 4, 4);
+      var text_width = fill.getBounds().width;
+      var text_height = fill.getBounds().height;
+      this.currentText.y = h;
+      //center
+      this.currentText.x = w/2 - text_width/2;
+//       //text.x = 100;
+      stage.addChild(this.currentText);
+      createjs.Tween.get(this.currentText,{loop: false})
+        .to({y:600}, 1500)
+        .wait(5000)
+        .call(function(){
+          stage.removeChild(that.currentText);
+          that.currentText = undefined;
+          if(that.queue.length) {
+            var n = that.queue.pop();
+            that.Add(n);
+          }
+        });
+      // createjs.Tween.get(this.currentText,{loop: false})
+      //   .to({alpha:1;y:600}, 1500)
+      //   .wait(5000);
+        // .call(function(){
+        //   stage.removeChild(this.currentText);
+        //   this.currentText=undefined;
+        //   if(this.queue.length) {
+        //     var n = this.queue.pop();
+        //     this.Add(n);
+        //   }
+        // });
+      };
+    },
+
   init: function(stage) {
     var rpc = require('node-json-rpc');
     niconico = new event_engine.niconicoDisplay(stage);
+    subtitle = new event_engine.subtitleDisplay(stage);
 
     var options = {
       // int port of rpc server, default 5080 for http or 5433 for https 
@@ -62,7 +117,11 @@ var event_engine = {
     this.serv =  new rpc.Server(options);
 
     this.serv.addMethod('scrollingText', function (para, callback){
+
       var msg = para.msg;
+
+      subtitle.Add(msg);
+
       var error, result;
       //add text to stage
       var c = new createjs.Container()
