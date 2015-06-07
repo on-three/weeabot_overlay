@@ -3,10 +3,15 @@
   <link rel="stylesheet" type="text/css" href="css/styles.css">
   <script src="js/startup.js"></script>
   <script src="https://code.createjs.com/createjs-2015.05.21.min.js"></script>
+  <script> 
+    //pure global scope (no 'var')
+    //var stage = new createjs.Stage("demoCanvas");
+  </script>
+  <script src="js/event_engine.js"></script>
 <title>#/jp/shows</title>
 <script>
   function init() {
-  var stage = new createjs.Stage("demoCanvas");
+        var stage = new createjs.Stage("demoCanvas");
         var circle = new createjs.Shape();
         circle.graphics.beginFill("Crimson").drawCircle(0, 0, 50);
         circle.x = 100;
@@ -20,6 +25,8 @@
           .to({x: 100}, 800, createjs.Ease.getPowInOut(2));
         createjs.Ticker.setFPS(60);
         createjs.Ticker.addEventListener("tick", stage);
+
+    event_engine.init(stage);
   }
 </script>
 </head>
