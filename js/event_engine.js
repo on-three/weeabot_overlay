@@ -21,20 +21,25 @@ var event_engine = {
     this.serv =  new rpc.Server(options);
 
     this.serv.addMethod('scrollingText', function (para, callback){
-      var text = para.msg;
-      console.log("param 0: " + text );//+ " out of " + para.length().toString());
+      var msg = para.msg;
       var error, result;
-      console.log("GOT TEST MESSAGE");
       //add text to stage
-      var text = new createjs.Text(text, "20px Arial", "#ff7700");
+      var c = new createjs.Container()
+      var outline = new createjs.Text(msg, "36px Arial", "#000000");
+      outline.outline = 3;
+      var fill = new createjs.Text(msg, "36px Arial", "#ffff00");
+      c.addChild(outline);
+      c.addChild(fill);
+      //text.shadow = new createjs.Shadow("#000000", 4, 4, 4);
       var w = stage.canvas.width;
-      text.x = w;
+      var text_width = fill.getBounds().width;
+      c.x = w;
       //text.x = 100;
-      stage.addChild(text);
+      stage.addChild(c);
 
-      createjs.Tween.get(text,{loop: false})
-        .to({x:0}, 4000)
-        .call(function(){stage.removeChild(text);});
+      createjs.Tween.get(c,{loop: false})
+        .to({x:-1.0*text_width}, 6000)
+        .call(function(){stage.removeChild(c);});
         //   var circle = new createjs.Shape();
         // circle.graphics.beginFill("Yellow").drawCircle(0, 0, 75);
         // circle.x = 100;
