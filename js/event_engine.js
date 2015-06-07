@@ -3,6 +3,18 @@
 
 var event_engine = {
 
+  logo : function(stage) {
+    var w = stage.canvas.width;
+    var h = stage.canvas.height;
+    var txt = new createjs.Text("#/jp/shows", "24px Arial", "#ffffff");
+    txt.shadow = new createjs.Shadow("#000000", 2, 2, 5);
+    var text_width = txt.getBounds().width;
+    var text_height = txt.getBounds().height;
+    txt.x = w - text_width - 10;
+    txt.y = h - text_height - 5;
+    stage.addChild(txt);
+  },
+
   lane : function(stage, ypos) {
     this.y = ypos;
     this.t_complete = 0;
@@ -60,10 +72,10 @@ var event_engine = {
       //limit text width to 3/4 canvas width
       var max_text_width = 3*w/4;
       this.currentText = new createjs.Container()
-      var outline = new createjs.Text(msg, "36px Arial", "#000000");
+      var outline = new createjs.Text(msg, "48px Arial", "#000000");
       outline.outline = 3;
       outline.lineWidth = max_text_width;
-      var fill = new createjs.Text(msg, "36px Arial", "#ffff00");
+      var fill = new createjs.Text(msg, "48px Arial", "#ffff00");
       fill.lineWidth = max_text_width;
       //this.currentText.addChild(outline);
       this.currentText.addChild(fill);
@@ -74,12 +86,13 @@ var event_engine = {
       this.currentText.y = h;
       //center
       this.currentText.x = w/2 - text_width/2;
+      var y = h - text_height - 30;
 
       stage.addChild(this.currentText);
       createjs.Tween.get(this.currentText,{loop: false})
-        .to({alpha:1,y:600}, 1500, createjs.Ease.backIn)
+        .to({alpha:1,y:y}, 1500, createjs.Ease.backIn)
         .wait(5000)
-        .to({alpha:0,y:480}, 1500, createjs.Ease.backOut)
+        .to({alpha:0,y:y-text_height}, 1500, createjs.Ease.backOut)
         .call(function(){
           stage.removeChild(that.currentText);
           that.currentText = undefined;
@@ -106,6 +119,7 @@ var event_engine = {
     var rpc = require('node-json-rpc');
     niconico = new event_engine.niconicoDisplay(stage);
     subtitle = new event_engine.subtitleDisplay(stage);
+    event_engine.logo(stage);
 
     var options = {
       // int port of rpc server, default 5080 for http or 5433 for https 
