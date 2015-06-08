@@ -115,10 +115,80 @@ var event_engine = {
       };
     },
 
+imagesDisplay : function(stage) {
+    var that = this;
+    this.queue = [];
+    this.currentImage = undefined;
+    this.loading = false;
+    this.Clear = function() {
+      this.queue = [];
+    };
+    this.Show = function (url) {
+      if(this.loading) {
+        this.queue.push(url)
+        return;
+      }
+      //first fetch our image (won't work well with large video files)
+      var image = new Image();
+      this.loading = true;
+      
+      image.onerror = function() {
+        //TODO: try next url in queue
+      };
+      image.onload = function() {
+
+        var w = stage.canvas.width;
+        var h = stage.canvas.height;
+        //limit text width to 3/4 canvas width
+        var max_text_width = 3*w/4;
+        this.currentImage = new createjs.Container()
+
+        var logo = new createjs.Bitmap(image);
+        this.currentImage.addChild(logo);
+        //stage.addChild(logo); 
+        //stage.update();
+        
+        //this.currentText.addChild(outline);
+        //this.currentImage.addChild(fill);
+        //this.currentImage.shadow = new createjs.Shadow("#000000", 2, 2, 5);
+        
+        var image_width = logo.getBounds().width;
+        var image_height = logo.getBounds().height;
+
+        //scale the image to fit our screen (max 50% height)
+        var scale =(h/2)/ image_height;
+        logo.scaleX = scale;
+        logo.scaleY = scale;
+
+        this.currentImage.alpha = 0;
+        this.currentImage.y = 0;
+        //center
+        this.currentImage.x = -1*image_width;//w/2 - text_width/2;
+        //var y = h - text_height - 30;
+        stage.addChild(this.currentImage);
+        createjs.Tween.get(this.currentImage,{loop: false})
+          .to({alpha:1,x:0}, 1500, createjs.Ease.backInOut)
+          .wait(2000)
+          .to({alpha:0,x:-1*image_width}, 1500, createjs.Ease.backInOut)
+          .call(function(){
+            stage.removeChild(that.currentImage);
+            that.currentImage = undefined;
+            that.loading = false;
+            if(that.queue.length) {
+              var n = that.queue.pop();
+              that.Show(n);
+            }
+          });
+        };
+        image.src = url;
+      };
+    },
+
   init: function(stage) {
     var rpc = require('node-json-rpc');
     niconico = new event_engine.niconicoDisplay(stage);
     subtitle = new event_engine.subtitleDisplay(stage);
+    images = new event_engine.imagesDisplay(stage);
     event_engine.logo(stage);
 
     var options = {
@@ -193,6 +263,15 @@ var event_engine = {
         //   .to({x: 100}, 800, createjs.Ease.getPowInOut(2));
 
       result = "OK";
+      callback(error, result);
+    });
+
+    this.serv.addMethod('showImage', function (para, callback){
+      var error, result;
+      var url = para.url;
+      images.Show(url);
+
+      result = 'OK';
       callback(error, result);
     });
    
