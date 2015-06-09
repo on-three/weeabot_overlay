@@ -115,6 +115,75 @@ var event_engine = {
       };
     },
 
+  scrollingMessageDisplay : function(stage) {
+    var that = this;
+    //this.queue = [];
+    this.currentText = undefined;
+    this.Clear = function() {
+      //this.queue = [];
+      if(that.currentText!=undefined) {
+        stage.removeChild(that.currentText);
+        that.currentText = undefined;
+      }
+    };
+    this.Add = function (msg) {
+      if(this.currentText!=undefined) {
+        //this.queue.push(msg)
+        return;
+      }
+      var w = stage.canvas.width;
+      var h = stage.canvas.height;
+      //limit text width to 3/4 canvas width
+      //var max_text_width = 3*w/4;
+      this.currentText = new createjs.Container()
+      var outline = new createjs.Text(msg, "48px Arial", "#000000");
+      outline.outline = 3;
+      //outline.lineWidth = max_text_width;
+      var fill = new createjs.Text(msg, "48px Arial", "#ffff00");
+      //fill.lineWidth = max_text_width;
+      //this.currentText.addChild(outline);
+      this.currentText.addChild(fill);
+      this.currentText.shadow = new createjs.Shadow("#000000", 2, 2, 5);
+      var text_width = fill.getBounds().width;
+      var text_height = fill.getBounds().height;
+      //this.currentText.alpha = 0;
+      this.currentText.y = h - text_height - 30;;
+      //center
+      this.currentText.x = w;
+      //var y = h - text_height - 30;
+
+      //loop scrolling message 3 times
+      stage.addChild(this.currentText);
+      createjs.Tween.get(this.currentText,{loop: false})
+        .to({x:-1*text_width}, 6000)
+        .to({x:w},0)
+        //.pause(1)
+        .to({x:-1*text_width}, 6000)
+        //.pause(1)
+        .to({x:w},0)
+        .to({x:-1*text_width}, 6000)
+        .call(function(){
+          stage.removeChild(that.currentText);
+          that.currentText = undefined;
+          //if(that.queue.length) {
+          //  var n = that.queue.pop();
+          //  that.Add(n);
+          });
+        //});
+      // createjs.Tween.get(this.currentText,{loop: false})
+      //   .to({alpha:1;y:600}, 1500)
+      //   .wait(5000);
+        // .call(function(){
+        //   stage.removeChild(this.currentText);
+        //   this.currentText=undefined;
+        //   if(this.queue.length) {
+        //     var n = this.queue.pop();
+        //     this.Add(n);
+        //   }
+        // });
+      };
+    },
+
 imagesDisplay : function(stage) {
     var that = this;
     this.queue = [];
@@ -189,6 +258,7 @@ imagesDisplay : function(stage) {
     niconico = new event_engine.niconicoDisplay(stage);
     subtitle = new event_engine.subtitleDisplay(stage);
     images = new event_engine.imagesDisplay(stage);
+    scrolling = new event_engine.scrollingMessageDisplay(stage);
     event_engine.logo(stage);
 
     var options = {
@@ -215,14 +285,16 @@ imagesDisplay : function(stage) {
 
     this.serv.addMethod('ClearAll', function (para, callback){
       subtitle.Clear();
+      scrolling.Clear();
       var error, result;
       result = 'OK';
       callback(error, result);
     });
 
     this.serv.addMethod('ScrollingMessage', function (para, callback){
-      //subtitle.Clear();
       var error, result;
+      var msg = para.msg;
+      scrolling.Add(msg)
       result = 'OK';
       callback(error, result);
     });
